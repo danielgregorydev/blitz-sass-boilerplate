@@ -2,7 +2,7 @@
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgres"
   url      = env("DATABASE_URL")
 }
 
@@ -13,16 +13,16 @@ generator client {
 // --------------------------------------
 
 model User {
-  id             Int      @id @default(autoincrement())
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
+  id             Int          @id @default(autoincrement())
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
   name           String?
-  email          String   @unique
+  email          String       @unique
   hashedPassword String?
-  role           String   @default("USER")
-
-  tokens   Token[]
-  sessions Session[]
+  role           GlobalRole
+  tokens         Token[]
+  sessions       Session[]
+  memberships    Membership[]
 }
 
 model Session {
@@ -41,13 +41,13 @@ model Session {
 }
 
 model Token {
-  id          Int      @id @default(autoincrement())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          Int       @id @default(autoincrement())
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
   hashedToken String
-  type        String
+  // type        String
   // See note below about TokenType enum
-  // type        TokenType
+  type        TokenType
   expiresAt   DateTime
   sentTo      String
 
@@ -60,6 +60,55 @@ model Token {
 // NOTE: It's highly recommended to use an enum for the token type
 //       but enums only work in Postgres.
 //       See: https://blitzjs.com/docs/database-overview#switch-to-postgresql
-// enum TokenType {
-//   RESET_PASSWORD
-// }
+
+enum TokenType {
+  RESET_PASSWORD
+}
+
+model Organization {
+  id   Int    @id @default(autoincrement())
+  name String
+
+  membership Membership[]
+  article    Article[]
+}
+
+model Membership {
+  id   Int            @id @default(autoincrement())
+  role MembershipRole
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+
+  user   User? @relation(fields: [userId], references: [id])
+  userId Int?
+
+  // When the user joins, we will clear out the name and email and set the user.
+  invitedName  String?
+  invitedEmail String?
+
+  @@unique([organizationId, invitedEmail])
+}
+
+enum MembershipRole {
+  OWNER
+  ADMIN
+  USER
+}
+
+// The owners of the SaaS (you) can have a SUPERADMIN role to access all data
+
+enum GlobalRole {
+  SUPERADMIN
+  CUSTOMER
+}
+
+model Article {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  title     String
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+}

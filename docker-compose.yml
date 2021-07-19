@@ -1,0 +1,13 @@
+version: "3"
+services:
+  db:
+    image: "postgres:13"
+    container_name: "blitz_boiler"
+    environment:
+      POSTGRES_PASSWORD: "password"
+    ports:
+      - "54320:5432"
+    volumes:
+      - blitz_boiler_dbdata:/var/lib/postgresql/data
+volumes:
+  blitz_boiler_dbdata:

@@ -12,30 +12,42 @@ export const SignupForm = (props: SignupFormProps) => {
   const [signupMutation] = useMutation(signup)
 
   return (
-    <div>
-      <h1>Create an Account</h1>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8">
+        <h1 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
+          Create an Account
+        </h1>
 
-      <Form
-        submitText="Create Account"
-        schema={Signup}
-        initialValues={{ email: "", password: "" }}
-        onSubmit={async (values) => {
-          try {
-            await signupMutation(values)
-            props.onSuccess?.()
-          } catch (error) {
-            if (error.code === "P2002" && error.meta?.target?.includes("email")) {
-              // This error comes from Prisma
-              return { email: "This email is already being used" }
-            } else {
-              return { [FORM_ERROR]: error.toString() }
+        <Form
+          submitText="Create Account"
+          schema={Signup}
+          initialValues={{ email: "", password: "" }}
+          onSubmit={async (values) => {
+            console.log("submitting")
+            try {
+              await signupMutation(values)
+              props.onSuccess?.()
+            } catch (error) {
+              console.log(error)
+              if (error.code === "P2002" && error.meta?.target?.includes("email")) {
+                // This error comes from Prisma
+                return { email: "This email is already being used" }
+              } else {
+                return { [FORM_ERROR]: error.toString() }
+              }
             }
-          }
-        }}
-      >
-        <LabeledTextField name="email" label="Email" placeholder="Email" />
-        <LabeledTextField name="password" label="Password" placeholder="Password" type="password" />
-      </Form>
+          }}
+        >
+          <LabeledTextField name="email" label="Email" placeholder="Email" />
+          <LabeledTextField name="companyName" label="Company Name" placeholder="ABC Ltd" />
+          <LabeledTextField
+            name="password"
+            label="Password"
+            placeholder="Password"
+            type="password"
+          />
+        </Form>
+      </div>
     </div>
   )
 }

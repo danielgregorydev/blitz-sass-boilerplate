@@ -23,10 +23,16 @@ export const LabeledTextField = forwardRef<HTMLInputElement, LabeledTextFieldPro
     const normalizedError = Array.isArray(error) ? error.join(", ") : error || submitError
 
     return (
-      <div {...outerProps}>
+      <div {...outerProps} className="rounded-md shadow-sm -space-y-px">
         <label>
           {label}
-          <input {...input} disabled={submitting} {...props} ref={ref} />
+          <input
+            {...input}
+            disabled={submitting}
+            {...props}
+            ref={ref}
+            className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
+          />
         </label>
 
         {touched && normalizedError && (
