@@ -71,6 +71,7 @@ model Organization {
 
   membership Membership[]
   article    Article[]
+  invite     Invite[]
 }
 
 model Membership {
@@ -86,7 +87,7 @@ model Membership {
   // When the user joins, we will clear out the name and email and set the user.
   invitedName  String?
   invitedEmail String?
-
+  invite       Invite?
   @@unique([organizationId, invitedEmail])
 }
 
@@ -111,4 +112,24 @@ model Article {
 
   organization   Organization @relation(fields: [organizationId], references: [id])
   organizationId Int
+}
+
+model Invite {
+  id           Int          @id @default(autoincrement())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  membership   Membership   @relation(fields: [membershipId], references: [id])
+  code         String       @unique
+  status       InviteStatus @default(pending)
+  membershipId Int
+
+  organization   Organization @relation(fields: [organizationId], references: [id])
+  organizationId Int
+}
+
+enum InviteStatus {
+  pending
+  accepted
+  expired
+  deleted
 }
