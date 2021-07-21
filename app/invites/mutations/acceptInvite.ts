@@ -1,16 +1,6 @@
 import { AuthenticationError, resolver, SecurePassword } from "blitz"
 import db from "db"
-import { z } from "zod"
-
-const password = z.string().min(10).max(100)
-
-const AcceptInvite = z.object({
-  name: z.string(),
-  email: z.string().email(),
-  password,
-  membershipId: z.number(),
-  inviteId: z.number(),
-})
+import { AcceptInvite } from "../validations"
 
 export default resolver.pipe(
   resolver.zod(AcceptInvite),

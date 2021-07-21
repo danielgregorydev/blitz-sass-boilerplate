@@ -1,27 +1,43 @@
-import { Link, useRouter, useMutation, BlitzPage, Routes } from "blitz"
+import {
+  Link,
+  useRouter,
+  useMutation,
+  BlitzPage,
+  Routes,
+  useQuery,
+  AuthorizationError,
+} from "blitz"
 import Layout from "app/core/layouts/Layout"
 import createInvite from "app/invites/mutations/createInvite"
 import { InviteForm, FORM_ERROR } from "app/invites/components/InviteForm"
+import { CreateInvite } from "app/invites/validations"
+import getAbility from "app/guard/queries/getAbility"
+import { Suspense, useEffect } from "react"
 
-// TODO Add authentication guards
-const NewInvitePage: BlitzPage = () => {
+const NewInvite = () => {
   const router = useRouter()
   const [createInviteMutation] = useMutation(createInvite)
 
-  return (
+  const [[canManageInvite], { isLoading }] = useQuery(getAbility, [["manage", "invite"]])
+
+  useEffect(() => {
+    if (isLoading || canManageInvite) {
+      return
+    }
+
+    router.push(Routes.LoginPage())
+  }, [isLoading, canManageInvite, router])
+
+  return !isLoading ? (
     <div>
       <h1>Create New Invite</h1>
 
       <InviteForm
         submitText="Create Invite"
-        // TODO use a zod schema for form validation
-        //  - Tip: extract mutation's schema into a shared `validations.ts` file and
-        //         then import and use it here
-        // schema={CreateInvite}
-        // initialValues={{}}
+        schema={CreateInvite}
         onSubmit={async (values) => {
           try {
-            const invite = await createInviteMutation(values)
+            await createInviteMutation(values)
             router.push(Routes.InvitesPage())
           } catch (error) {
             console.error(error)
@@ -38,8 +54,16 @@ const NewInvitePage: BlitzPage = () => {
         </Link>
       </p>
     </div>
+  ) : (
+    <div>Loading</div>
   )
 }
+
+const NewInvitePage: BlitzPage = () => (
+  <Suspense fallback={<div>Loading...</div>}>
+    <NewInvite />
+  </Suspense>
+)
 
 NewInvitePage.authenticate = true
 NewInvitePage.getLayout = (page) => <Layout title={"Create New Invite"}>{page}</Layout>

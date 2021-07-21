@@ -19,6 +19,18 @@ const Guard = GuardBuilder<ExtendedResourceTypes, ExtendedAbilityTypes>(
           })) === 1
         )
       })
+
+      if (ctx.session.roles?.includes("OWNER") || ctx.session.roles?.includes("ADMIN")) {
+        can("manage", "invite")
+
+        can("delete", "invite", async ({ id }) => {
+          return (
+            (await db.invite.count({
+              where: { id, organizationId: ctx.session.orgId },
+            })) === 1
+          )
+        })
+      }
     }
   }
 )

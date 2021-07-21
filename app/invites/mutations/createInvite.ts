@@ -3,11 +3,7 @@ import db from "db"
 import { z } from "zod"
 import { v4 } from "uuid"
 import Guard from "app/guard/ability"
-
-const CreateInvite = z.object({
-  invitedName: z.string(),
-  invitedEmail: z.string().email(),
-})
+import { CreateInvite } from "../validations"
 
 export default Guard.authorize(
   "create",

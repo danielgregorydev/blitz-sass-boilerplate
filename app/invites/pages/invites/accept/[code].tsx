@@ -6,6 +6,14 @@ import acceptInvite from "app/invites/mutations/acceptInvite"
 import getInviteByCode from "app/invites/queries/getInviteByCode"
 import React, { Suspense } from "react"
 import { AcceptInviteForm } from "app/invites/components/AcceptInviteForm"
+import { password } from "../../../../auth/validations"
+import { z } from "zod"
+
+const AcceptInviteSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  password,
+})
 
 const AcceptInvite: BlitzPage = () => {
   const router = useRouter()
@@ -27,13 +35,10 @@ const AcceptInvite: BlitzPage = () => {
 
       <AcceptInviteForm
         submitText="Create Account"
-        // TODO use a zod schema for form validation
-        //  - Tip: extract mutation's schema into a shared `validations.ts` file and
-        //         then import and use it here
-        // schema={CreateInvite}
+        schema={AcceptInviteSchema}
         initialValues={{
-          name: invite.membership.invitedName,
-          email: invite.membership.invitedEmail,
+          name: invite.membership.invitedName || undefined,
+          email: invite.membership.invitedEmail || undefined,
         }}
         onSubmit={async (values) => {
           try {
@@ -43,6 +48,7 @@ const AcceptInvite: BlitzPage = () => {
               inviteId: invite.id,
             })
 
+            // todo push to a better page
             router.push(Routes.Home())
           } catch (error) {
             console.error(error)
